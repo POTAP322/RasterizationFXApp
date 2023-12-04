@@ -49,12 +49,27 @@ public class Rasterization {
         int error = 2 - 2 * radius;
         int x = -radius;
         int y = 0;
-        //int angle = startAngle;
+
+        double startPointX = xc + radius * cos(startAngle * PI / 180);
+        double startPointY = yc + radius * sin(startAngle * PI / 180);
+
+        double endPointX = xc + radius * cos(endAngle * PI / 180);
+        double endPointY = yc + radius * sin(endAngle * PI / 180);
+
         do {
-                pixelWriter.setColor(xc - x, yc + y, Color.BLACK);
-                pixelWriter.setColor(xc + x, yc - y, Color.BLACK);
-                pixelWriter.setColor(xc - x, yc - y, Color.BLACK);
-                pixelWriter.setColor(xc + x, yc + y, Color.BLACK);
+                if(isPointOnArc(xc,yc,startAngle,endAngle,xc-x,yc+y) ){
+                    pixelWriter.setColor(xc - x, yc + y, Color.BLACK);
+                }
+                if(isPointOnArc(xc,yc,startAngle,endAngle,xc+x,yc-y)){
+                    pixelWriter.setColor(xc + x, yc - y, Color.BLACK);
+                }
+                if(isPointOnArc(xc,yc,startAngle,endAngle,xc-x,yc-y)){
+                    pixelWriter.setColor(xc - x, yc - y, Color.BLACK);
+                }
+                if(isPointOnArc(xc,yc,startAngle,endAngle,xc+x,yc+y)){
+                    pixelWriter.setColor(xc + x, yc + y, Color.BLACK);
+                }
+
 
             radius = error;
 
@@ -79,6 +94,21 @@ public class Rasterization {
         double blue = (startColor.getBlue() * (1 - fraction) + endColor.getBlue() * fraction);
 
         return new Color(red, green, blue, 1);
+    }
+
+    public static boolean isPointOnArc(double centerX, double centerY, double startAngle, double endAngle, double x, double y) {
+        startAngle = Math.toRadians(startAngle);
+        endAngle = Math.toRadians(endAngle);
+        double angle = Math.atan2(y - centerY, x - centerX); // угол между центром окружности и заданной точкой
+
+        if (angle < 0) {
+            angle += 2 * Math.PI; // приводим угол к диапазону от 0 до 2π
+        }
+        if (startAngle <= endAngle) {
+            return angle >= startAngle && angle <= endAngle; // проверяем, находится ли угол между начальным и конечным углами
+        } else {
+            return angle >= startAngle || angle <= endAngle; // для случая, когда конечный угол меньше начального
+        }
     }
 
 }

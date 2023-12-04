@@ -23,9 +23,9 @@ public class RasterizationController {
 //        Rasterization.drawRectangle(canvas.getGraphicsContext2D(), 200, 300, 200, 100, Color.CHOCOLATE);
 //        Rasterization.drawRectangle(canvas.getGraphicsContext2D(), 250, 250, 50, 200, Color.AQUA);
 
-        Rasterization.drawCircleAcr(canvas.getGraphicsContext2D(), 100, 200, 300,Color.BLUE,Color.RED,0,100);
+        //Rasterization.drawCircleAcr(canvas.getGraphicsContext2D(), 100, 200, 300,Color.BLUE,Color.RED,0,100);
 
-        Rasterization.drawCircleArc2(canvas.getGraphicsContext2D(), 200,200,80,10,100);
+        Rasterization.drawCircleArc2(canvas.getGraphicsContext2D(), 200,200,50,0,300);
 
     }
 
