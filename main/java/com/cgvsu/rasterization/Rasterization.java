@@ -38,9 +38,7 @@ public class Rasterization {
             pixelWriter.setColor((int) Math.round(x + x1), (int) Math.round(y + y1), color);
         }
     }
-
-
-    public static void drawCircleArc2(
+    public static void drawBrezenheimCircle(
             final GraphicsContext graphicsContext,
             final int xc, final int yc,
             int radius,
@@ -49,12 +47,50 @@ public class Rasterization {
         int error = 2 - 2 * radius;
         int x = -radius;
         int y = 0;
+        //коряво исправил дырки сверху и снизу :)
+        pixelWriter.setColor(xc,yc+radius,Color.BLACK);
+        pixelWriter.setColor(xc,yc-radius,Color.BLACK);
 
-        double startPointX = xc + radius * cos(startAngle * PI / 180);
-        double startPointY = yc + radius * sin(startAngle * PI / 180);
+        do {
+            pixelWriter.setColor(xc - x, yc + y, Color.BLACK);
+            pixelWriter.setColor(xc + x, yc - y, Color.BLACK);
+            pixelWriter.setColor(xc - x, yc - y, Color.BLACK);
+            pixelWriter.setColor(xc + x, yc + y, Color.BLACK);
 
-        double endPointX = xc + radius * cos(endAngle * PI / 180);
-        double endPointY = yc + radius * sin(endAngle * PI / 180);
+            radius = error;
+
+            if (radius <= y) {
+                y++;
+                error = error + y * 2 + 1;
+
+            }
+            if (radius > x || error > y) {
+                x++;
+                error = error + x * 2 + 1;
+            }
+
+        } while (x < 0);
+    }
+
+    public static void drawCircleArc2(
+            final GraphicsContext graphicsContext,
+            final int xc, final int yc,
+            int radius,
+            final int startAngle, final int endAngle)
+    {
+        final PixelWriter pixelWriter = graphicsContext.getPixelWriter();
+        int error = 2 - 2 * radius;
+        int x = -radius;
+        int y = 0;
+
+        //коряво исправил дырки сверху и снизу :)
+        if(isPointOnArc(xc,yc,startAngle,endAngle,xc,yc+radius)){
+            pixelWriter.setColor(xc,yc+radius,Color.BLACK);
+        }
+        if(isPointOnArc(xc,yc,startAngle,endAngle,xc,yc-radius)){
+            pixelWriter.setColor(xc,yc-radius,Color.BLACK);
+        }
+
 
         do {
                 if(isPointOnArc(xc,yc,startAngle,endAngle,xc-x,yc+y) ){
@@ -70,7 +106,6 @@ public class Rasterization {
                     pixelWriter.setColor(xc + x, yc + y, Color.BLACK);
                 }
 
-
             radius = error;
 
             if (radius <= y) {
@@ -84,6 +119,7 @@ public class Rasterization {
             }
 
         } while (x < 0);
+
 
     }
 
