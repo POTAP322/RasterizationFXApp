@@ -38,6 +38,7 @@ public class Rasterization {
             pixelWriter.setColor((int) Math.round(x + x1), (int) Math.round(y + y1), color);
         }
     }
+
     public static void drawBrezenheimCircle(
             final GraphicsContext graphicsContext,
             final int xc, final int yc,
@@ -47,9 +48,10 @@ public class Rasterization {
         int error = 2 - 2 * radius;
         int x = -radius;
         int y = 0;
+
         //коряво исправил дырки сверху и снизу :)
-        pixelWriter.setColor(xc,yc+radius,Color.BLACK);
-        pixelWriter.setColor(xc,yc-radius,Color.BLACK);
+        pixelWriter.setColor(xc, yc + radius, Color.BLACK);
+        pixelWriter.setColor(xc, yc - radius, Color.BLACK);
 
         do {
             pixelWriter.setColor(xc - x, yc + y, Color.BLACK);
@@ -76,35 +78,50 @@ public class Rasterization {
             final GraphicsContext graphicsContext,
             final int xc, final int yc,
             int radius,
-            final int startAngle, final int endAngle)
-    {
+            final int startAngle, final int endAngle,
+            final Color startColor, final Color endColor) {
         final PixelWriter pixelWriter = graphicsContext.getPixelWriter();
         int error = 2 - 2 * radius;
         int x = -radius;
         int y = 0;
 
-        //коряво исправил дырки сверху и снизу :)
-        if(isPointOnArc(xc,yc,startAngle,endAngle,xc,yc+radius)){
-            pixelWriter.setColor(xc,yc+radius,Color.BLACK);
-        }
-        if(isPointOnArc(xc,yc,startAngle,endAngle,xc,yc-radius)){
-            pixelWriter.setColor(xc,yc-radius,Color.BLACK);
-        }
+        double angle = startAngle;
+
+        //шаг для смены цвета(fraction)
+        double step = (180 / PI) / radius;
+
+        //нужен для того, чтобы нормально отрисовывать багованные пиксели сверху и снизу
+        final int initialRadius = radius;
 
 
         do {
-                if(isPointOnArc(xc,yc,startAngle,endAngle,xc-x,yc+y) ){
-                    pixelWriter.setColor(xc - x, yc + y, Color.BLACK);
-                }
-                if(isPointOnArc(xc,yc,startAngle,endAngle,xc+x,yc-y)){
-                    pixelWriter.setColor(xc + x, yc - y, Color.BLACK);
-                }
-                if(isPointOnArc(xc,yc,startAngle,endAngle,xc-x,yc-y)){
-                    pixelWriter.setColor(xc - x, yc - y, Color.BLACK);
-                }
-                if(isPointOnArc(xc,yc,startAngle,endAngle,xc+x,yc+y)){
-                    pixelWriter.setColor(xc + x, yc + y, Color.BLACK);
-                }
+            double fraction = (double) (angle - startAngle) / (double) (endAngle - startAngle);
+            Color color = interpolate(startColor, endColor, fraction);
+            if (isPointOnArc(xc, yc, startAngle, endAngle, xc - x, yc + y)) {
+                pixelWriter.setColor(xc - x, yc + y, color);
+                angle+=step;
+            }
+            if (isPointOnArc(xc, yc, startAngle, endAngle, xc + x, yc - y)) {
+                pixelWriter.setColor(xc + x, yc - y, color);
+                angle+=step;
+            }
+            if (isPointOnArc(xc, yc, startAngle, endAngle, xc - x, yc - y)) {
+                pixelWriter.setColor(xc - x, yc - y, color);
+                angle+=step;
+            }
+            if (isPointOnArc(xc, yc, startAngle, endAngle, xc + x, yc + y)) {
+                pixelWriter.setColor(xc + x, yc + y, color);
+                angle+=step;
+            }
+
+            //коряво исправил дырки сверху и снизу :)
+            if (isPointOnArc(xc, yc, startAngle, endAngle, xc, yc + initialRadius)) {
+                pixelWriter.setColor(xc, yc + initialRadius, color);
+            }
+            if (isPointOnArc(xc, yc, startAngle, endAngle, xc, yc - initialRadius)) {
+                pixelWriter.setColor(xc, yc - initialRadius, color);
+            }
+
 
             radius = error;
 
@@ -118,7 +135,9 @@ public class Rasterization {
                 error = error + x * 2 + 1;
             }
 
-        } while (x < 0);
+
+
+        } while (x < 0 );
 
 
     }
